@@ -81,7 +81,8 @@ def outflow(boundary, ic):
         V_b = P_in[1:3] + (Vn_b - Vn_in)*side.normal
         P_b = [rho_b, V_b[0], V_b[1], p_exit]
         # F = P2F(P_b, side)
-        F = flux_roe_fortran(side, P_in, P_b)
+        if ic == 1: F = flux_roe_fortran(side, P_b, P_in)
+        else: F = flux_roe_fortran(side, P_in, P_b)
         side.cells[ic].res += sign_ic(ic) * F
 
 # Điều kiện biên inlow xác định theo các đường đặc trưng
@@ -102,12 +103,13 @@ def inflow(boundary, ic):
             a_b = 0.25*(gamma_m1)*(R_p - R_m)
             V_b = P_e[1:3] + (Vn_b - Vn_e)*side.normal
             R = P_e[3]/(P_e[0]**gamma)
-            rho_b = (a_b*a_b/(gamma*R))**(1.0/gamma)
+            rho_b = (a_b*a_b/(gamma*R))**(1.0/gamma_m1)
             p_b = R*rho_b**gamma
             P_b = [rho_b, V_b[0], V_b[1], p_b]
 
         # F = P2F(P_b, side)
-        F = flux_roe_fortran(side, P_b, P_in)
+        if ic == 1: F = flux_roe_fortran(side, P_b, P_in)
+        else: F = flux_roe_fortran(side, P_in, P_b)
         side.cells[ic].res += sign_ic(ic)*F
 
 # Điều kiện biên joint
